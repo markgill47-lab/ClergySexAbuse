@@ -29,7 +29,7 @@ Tell the user: "I'm checking that your computer has the software we need..."
 
 Run:
 ```bash
-git clone https://github.com/REPO_OWNER/ClergySexAbuse.git
+git clone https://github.com/markgill47-lab/ClergySexAbuse.git
 cd ClergySexAbuse
 ```
 

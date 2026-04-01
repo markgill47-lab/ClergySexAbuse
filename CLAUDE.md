@@ -8,7 +8,7 @@ Designed for AI-agent-driven analysis with an MCP server interface.
 ### 1. Clone and install
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/markgill47-lab/ClergySexAbuse.git
 cd ClergySexAbuse
 python -m venv .venv
 source .venv/bin/activate   # or .venv\Scripts\activate on Windows
