@@ -114,7 +114,23 @@ Then report the results: "Everything looks good! The database has [X] accused cl
 
 If the database is missing, tell the user: "The database file didn't come through. It should be about 50 MB. Please check with the person who shared this project — they may need to send the file separately. It goes at `data/db/clergy_abuse.db`."
 
-### Step 6: Restart instructions
+### Step 6: Install research skills
+
+Copy the research skills to the global commands directory so they appear in the `/` menu:
+
+```bash
+mkdir -p ~/.claude/commands
+cp .claude/commands/*.md ~/.claude/commands/
+```
+
+Count the files copied:
+```bash
+ls ~/.claude/commands/*.md | wc -l
+```
+
+Tell the user: "I've installed [X] research skills. These are slash commands like `/research`, `/generate-map`, `/investigate-diocese`, and more. I'll explain them all once we're set up. To get updates in the future, just type `/update`."
+
+### Step 7: Restart instructions
 
 This is the final step. Tell the user EXACTLY this:
 
@@ -144,6 +160,8 @@ The project includes a configuration file that gives me direct access to the res
 📊 **2 skills** — `/research` for systematic investigations with structured reports, and `/generate-map` for interactive US maps
 
 📁 **10,500+ records** from 4 sources across all 50 states, with 32,000+ consequence events and 640 linked court documents
+
+**Staying up to date:** Type `/update` at any time and I'll pull the latest skills, data, and code. The platform is actively being improved with new data sources and analysis tools.
 
 This data documents real harm to real people. All records come from public sources — court documents, diocese disclosures, and investigative journalism. Please handle it with care.
 
