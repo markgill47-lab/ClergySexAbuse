@@ -1,184 +1,166 @@
 # Clergy Abuse Data Platform — Setup Instructions
 
-Hello! These instructions will set up the Clergy Abuse Data Platform on your machine. This is a research database of 10,500+ Catholic clergy accused of sexual abuse in the United States, with AI-powered analysis tools.
+## For the user
 
-**To get started:** Open Claude Code in this folder and say: "Follow the instructions in SETUP_INSTRUCTIONS.md"
+Copy this entire file into a Claude Code chat and say: **"Follow these setup instructions."**
 
-Claude will walk you through each step and explain what's happening.
+That's it. Claude will handle everything else and explain what's happening along the way.
 
 ---
 
 ## Instructions for Claude
 
-You are setting up the Clergy Abuse Data Platform for a researcher. Follow these steps IN ORDER. After each step, explain to the user what you just did and what's coming next in plain language. If any step fails, stop and help the user troubleshoot before continuing.
+You are setting up the Clergy Abuse Data Platform for a researcher who may not be technical. Follow these steps IN ORDER. Before each step, explain to the user IN PLAIN LANGUAGE what you're about to do and why. After each step, confirm it worked. If anything fails, stop, explain the problem simply, and help them fix it before continuing.
+
+**Be warm, patient, and thorough in your explanations.** This user may not know what a "virtual environment" or "repository" is. Translate everything into everyday language.
 
 ### Step 1: Check prerequisites
 
-Before starting, verify the user has:
-- Python 3.11 or newer: run `python --version` or `python3 --version`
-- Git: run `git --version`
-- pip: run `pip --version` or `pip3 --version`
+Check whether Python and Git are installed:
+- Run `python --version` (or `python3 --version`)
+- Run `git --version`
 
-If any are missing, stop and tell the user what they need to install and where to get it:
-- Python: https://python.org/downloads (check "Add Python to PATH" during install)
-- Git: https://git-scm.com/downloads
+**If Python is missing**, tell the user:
+"I need Python installed on your computer to run this. Here's what to do:
+1. Go to https://python.org/downloads
+2. Download the latest version for your computer
+3. **IMPORTANT:** During installation, check the box that says 'Add Python to PATH'
+4. After it installs, close and reopen Claude Code, paste these instructions again, and I'll pick up where we left off."
 
-Tell the user: "I'm checking that your computer has the software we need..."
+**If Git is missing**, tell the user:
+"I need Git installed to download the project. Here's what to do:
+1. Go to https://git-scm.com/downloads
+2. Download and install the version for your computer (just click Next through the defaults)
+3. After it installs, close and reopen Claude Code, paste these instructions again, and I'll pick up where we left off."
 
-### Step 2: Clone the repository
+**If both are installed**, tell the user: "Great news — your computer already has everything I need. Let me download the project."
 
-Run:
+### Step 2: Download the project
+
+First, check if we're already inside the project (look for `pyproject.toml` or `src/` directory in the current folder, or in a `ClergySexAbuse` subfolder).
+
+**If the project is NOT here yet**, run:
 ```bash
 git clone https://github.com/markgill47-lab/ClergySexAbuse.git
-cd ClergySexAbuse
 ```
 
-**NOTE:** If the repo URL above doesn't work, ask the user for the correct repository URL or if they have the files already.
+Then change into that directory. Use `cd ClergySexAbuse` as a bash command.
 
-If the repo has already been cloned (you can tell because there's a `pyproject.toml` and `src/` directory present), skip this step and tell the user: "Looks like the code is already here. Moving on to setup."
+Tell the user: "I'm downloading the project from GitHub. This includes a database of 10,500+ accused clergy compiled from public sources — court documents, diocese disclosures, and investigative journalism. It's about 50 MB."
 
-Tell the user: "I'm downloading the project code. This includes the database with 10,500+ records of accused clergy compiled from public sources like BishopAccountability.org and Jeff Anderson & Associates."
+**If the project IS already here**, tell the user: "The project code is already on your computer. Moving to the next step."
 
-### Step 3: Create a Python virtual environment
+### Step 3: Set up the Python environment
 
 Run:
 ```bash
 python -m venv .venv
 ```
 
-Then activate it. The command depends on the operating system:
-- **Windows (PowerShell):** `.venv\Scripts\Activate.ps1`
-- **Windows (cmd/Git Bash):** `.venv\Scripts\activate` or `source .venv/Scripts/activate`
+Then activate it. Detect the OS and use the right command:
+- **Windows:** `source .venv/Scripts/activate`
 - **Mac/Linux:** `source .venv/bin/activate`
 
-Tell the user: "I'm creating an isolated Python environment so the project's dependencies don't interfere with anything else on your computer. Think of it like a sandbox."
+Tell the user: "I'm setting up a private workspace for this project. It's like creating a separate room for the software so it doesn't bump into anything else on your computer. This only takes a moment."
 
-### Step 4: Install dependencies
+### Step 4: Install the software
 
 Run:
 ```bash
 pip install -e .
 ```
 
-This will take a minute or two. The main packages being installed are:
-- SQLAlchemy (database access)
-- FastAPI (the API framework)
-- MCP SDK (the protocol that lets me talk to the database)
-- httpx and BeautifulSoup (for web scraping, if you want to refresh the data later)
+Tell the user: "I'm installing the libraries the platform needs. This takes a couple of minutes — you'll see a lot of text scrolling by, that's normal."
 
-Tell the user: "I'm installing the software libraries the platform needs. This takes a couple minutes..."
+If this fails, check if the venv is activated (look for `(.venv)` in the prompt). If not, re-activate and retry. On Windows PowerShell, you may need to run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` first.
 
-### Step 5: Verify the database
+### Step 5: Verify everything works
 
-Run a quick check to make sure the database file exists and has data:
-
-```python
+Run this to check the database:
+```bash
 python -c "
-import sqlite3
-conn = sqlite3.connect('data/db/clergy_abuse.db')
-c = conn.cursor()
-c.execute('SELECT COUNT(*) FROM accused_clergy')
-clergy = c.fetchone()[0]
-c.execute('SELECT COUNT(*) FROM documents')
-docs = c.fetchone()[0]
-c.execute('SELECT COUNT(*) FROM consequences')
-cons = c.fetchone()[0]
-c.execute('SELECT COUNT(DISTINCT source_name) FROM source_records')
-sources = c.fetchone()[0]
-print(f'Database OK: {clergy} accused clergy, {docs} documents, {cons} consequence events, {sources} data sources')
-conn.close()
+import sqlite3, os
+db_path = 'data/db/clergy_abuse.db'
+if not os.path.exists(db_path):
+    print('ERROR: Database not found')
+else:
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    c.execute('SELECT COUNT(*) FROM accused_clergy')
+    clergy = c.fetchone()[0]
+    c.execute('SELECT COUNT(*) FROM documents')
+    docs = c.fetchone()[0]
+    c.execute('SELECT COUNT(*) FROM consequences')
+    cons = c.fetchone()[0]
+    print(f'OK: {clergy} clergy, {docs} documents, {cons} consequence events')
+    conn.close()
 "
 ```
 
-Tell the user the results. It should show approximately 10,500 clergy, 640 documents, 32,000 consequence events, and 4 data sources.
-
-If the database file is missing, tell the user: "The database file isn't here. This might mean it wasn't included in your copy of the project. Check with the person who shared this with you — the file should be at data/db/clergy_abuse.db and is about 50 MB."
-
-### Step 6: Verify the MCP server
-
-Test that the MCP server (the bridge between me and the database) loads correctly:
-
-```python
+Then check the analysis engine:
+```bash
 python -c "
-import sys
-sys.path.insert(0, '.')
+import sys; sys.path.insert(0, '.')
 from src.mcp_server.server import app, list_tools
 import asyncio
 tools = asyncio.run(list_tools())
-print(f'MCP server OK: {len(tools)} research tools available')
-for t in tools[:5]:
-    print(f'  - {t.name}')
-print(f'  ... and {len(tools)-5} more')
+print(f'OK: {len(tools)} research tools ready')
 "
 ```
 
-Tell the user: "The analysis engine is working. I now have access to 18 specialized research tools for querying the database."
+Tell the user: "Let me run a quick health check to make sure everything installed correctly..."
 
-### Step 7: Explain the MCP connection
+Then report the results: "Everything looks good! The database has [X] accused clergy records and the analysis engine has [X] research tools ready."
 
-Tell the user:
+If the database is missing, tell the user: "The database file didn't come through. It should be about 50 MB. Please check with the person who shared this project — they may need to send the file separately. It goes at `data/db/clergy_abuse.db`."
 
-"The project includes a file called `.mcp.json` that tells Claude Code how to connect to the database. **You need to restart this Claude Code session** for it to take effect.
+### Step 6: Restart instructions
 
-Here's what to do:
-1. Close this Claude Code session (type /exit or close the window)
-2. Open Claude Code again in this same folder (ClergySexAbuse)
-3. Claude Code will ask you to approve a new MCP server called 'clergy-abuse-data' — say yes
-4. That's it! I'll have the research tools available automatically from now on
+This is the final step. Tell the user EXACTLY this:
 
-When you come back, try asking me:
-- 'How many accused clergy are in California?'
-- '/research What happened to priests sent to treatment facilities?'
-- '/generate-map conviction rate by state'
-"
+---
 
-### Step 8: What you now have
+**Setup is complete!** Here's what happens next:
 
-After restarting, explain to the user what they have access to:
+The project includes a configuration file that gives me direct access to the research database. For that to take effect, you need to restart this session. Here's how:
 
-"You now have a research platform with:
+1. **Type `/exit`** to close this session (or just close the window)
+2. **Open Claude Code again** — make sure you're in the `ClergySexAbuse` folder
+3. **You'll see a prompt** asking you to approve an "MCP server" called `clergy-abuse-data` — **say yes** (this is what connects me to the database)
+4. **That's it!** From now on, I'll have full access to the research tools every time you open Claude Code in this folder
 
-**18 analysis tools** that I can use automatically:
-- Search for clergy by name, state, diocese, or status
-- Pull complete profiles with all related data
-- Track consequence timelines (what happened after each accusation)
-- Find patterns like 'sent to treatment then reinstated'
-- Detect cross-state funneling through treatment facilities
-- Identify clergy who faced zero consequences
-- Measure how long it took for consequences to occur
-- Map transfer networks between dioceses
-- Export data as CSV for your own analysis
+**Once you're back, try asking me any of these:**
 
-**2 research skills** (slash commands):
-- `/research <your question>` — I'll do a systematic investigation and produce a structured report
-- `/generate-map <metric>` — I'll create an interactive map of the US showing any metric you want
+- "How many accused clergy are in California?"
+- "What happened to priests sent to the Servants of the Paraclete facility?"
+- "Show me who was sent to treatment and then reinstated to ministry"
+- `/research What are the conviction rates by state?`
+- `/generate-map no-accountability rate by state`
 
-**The data covers:**
-- 10,500+ accused clergy across all 50 states
-- 4 data sources (BishopAccountability.org, Anderson Advocates, UNM Santa Fe Archive)
-- 32,000+ consequence events tracking what happened to each individual
-- 640 linked documents (court filings, personnel files, depositions)
+**What you now have access to:**
 
-**Key findings already in the data:**
-- 66.5% of accused clergy had 'no known action' as their final outcome
-- Only 4.7% were convicted
-- The Servants of the Paraclete facility in New Mexico received 156 clergy from 33 states
-- Median time from ordination to first consequence: 45 years
+🔍 **18 research tools** — I can search the database, pull complete profiles, track consequence timelines, find patterns, detect facility funneling networks, measure reporting delays, and export data
 
-This is sensitive subject matter. The data documents real harm to real people. All records come from public sources — court documents, diocese disclosures, and investigative journalism."
+📊 **2 skills** — `/research` for systematic investigations with structured reports, and `/generate-map` for interactive US maps
+
+📁 **10,500+ records** from 4 sources across all 50 states, with 32,000+ consequence events and 640 linked court documents
+
+This data documents real harm to real people. All records come from public sources — court documents, diocese disclosures, and investigative journalism. Please handle it with care.
 
 ---
 
 ## Troubleshooting
 
-If something goes wrong during setup, here are common issues:
+If something goes wrong during setup, here are common fixes:
 
-**"python not found"** — Python isn't installed or isn't on the PATH. Download from python.org and make sure to check "Add Python to PATH" during installation.
+**"python not found"** — Python isn't installed or isn't on the PATH. Download from https://python.org/downloads and check "Add Python to PATH" during installation. Then restart Claude Code.
 
-**"pip install fails"** — Make sure the virtual environment is activated (you should see `(.venv)` in your terminal prompt). If on Windows and using PowerShell, you may need to run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` first.
+**"git not found"** — Git isn't installed. Download from https://git-scm.com/downloads and install with defaults. Then restart Claude Code.
 
-**"database not found"** — The SQLite database file should be at `data/db/clergy_abuse.db`. If it's missing, the person who shared this project may need to include it separately (it's ~50 MB).
+**"pip install fails"** — The virtual environment probably isn't activated. Look for `(.venv)` in your terminal prompt. If it's missing, run the activate command again (Step 3).
 
-**"MCP server not connecting"** — Make sure you restarted Claude Code after setup. The `.mcp.json` file in the project root tells Claude Code how to find the server. If Claude Code asks you to approve the server, say yes.
+**"database not found"** — The file `data/db/clergy_abuse.db` is missing. Ask the person who shared this project to include it (it's ~50 MB).
 
-**"ModuleNotFoundError"** — The virtual environment isn't activated, or `pip install -e .` didn't complete. Re-activate the venv and try the install again.
+**"MCP server not connecting after restart"** — Make sure Claude Code is open in the `ClergySexAbuse` folder (not a parent folder). When prompted to approve the `clergy-abuse-data` server, say yes.
+
+**Windows PowerShell script errors** — Run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` and try again.
