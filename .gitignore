@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+*.egg-info/
+dist/
+node_modules/
+
+# Raw scraped data (too large for git, rebuild with scrapers)
+data/raw/
+data/documents/
+data/exports/
+
+# Keep the DB file — it IS the distribution
+# data/db/*.db
+
+# Keep skills, exclude local settings
+.claude/settings.local.json
+.claude/plans/
+
+# Temp files
+scripts/create_exec_brief.js
+/tmp/

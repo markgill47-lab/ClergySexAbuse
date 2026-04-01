@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "clergy-abuse-data": {
+      "command": "python",
+      "args": ["start_mcp.py"],
+      "cwd": "."
+    }
+  }
+}
